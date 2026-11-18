@@ -70,18 +70,18 @@ body{
   -webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4);
   border-bottom:1px solid var(--line);
 }
-.topbar .inner{max-width:1080px;margin:0 auto;padding:11px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.topbar .inner{max-width:1080px;margin:0 auto;padding:11px 18px;display:flex;align-items:center;gap:14px;flex-wrap:nowrap}
+.brand{display:flex;align-items:center;gap:11px;min-width:0;flex:0 1 auto;overflow:hidden}
 .mark{
   width:38px;height:38px;border-radius:12px;flex:none;display:grid;place-items:center;
   background:linear-gradient(150deg,var(--brand-2),var(--brand));
   box-shadow:0 6px 16px -8px rgba(13,110,115,.85),inset 0 1px 0 rgba(255,255,255,.22);
 }
 .mark svg{width:21px;height:21px;display:block}
-.brand h1{font-size:17.5px;font-weight:750;letter-spacing:.2px;line-height:1.25;white-space:nowrap}
+.brand h1{font-size:17.5px;font-weight:750;letter-spacing:.2px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .brand .tagline{font-size:11.5px;color:var(--sub);letter-spacing:.35px;white-space:nowrap}
 .brand .tagline b{color:var(--brand);font-weight:600}
-.tools{margin-left:auto;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.tools{margin-left:auto;display:flex;align-items:center;gap:9px;flex-wrap:nowrap;flex:0 0 auto}
 .pick{
   position:relative;display:inline-flex;align-items:center;gap:7px;
   height:38px;padding:0 10px 0 12px;border:1px solid var(--line-2);border-radius:11px;
@@ -338,10 +338,15 @@ button:focus-visible{outline:none;box-shadow:var(--ring)}
 
 @media(max-width:680px){
   .wrap{padding:0 13px}
-  .topbar .inner{padding:10px 13px;gap:10px}
+  .topbar .inner{padding:9px 12px;gap:9px}
+  .brand{gap:8px}
+  .brand h1{font-size:16px}
   .brand .tagline{display:none}
-  .tools{gap:7px}
-  .pick{padding-left:10px}
+  .tools{gap:6px}
+  .pick{padding-left:9px}
+  .pick select{font-size:13px;padding-left:2px}
+  .status{font-size:11px;padding:4px 9px}
+  .icon-btn{width:32px;height:32px}
   .card{padding:16px;border-radius:15px}
   .hero-card{padding:17px 15px 15px}
   .flavors{gap:6px}
@@ -355,6 +360,15 @@ button:focus-visible{outline:none;box-shadow:var(--ring)}
   .pcard{padding:9px 10px}
   .pcard .pv{font-size:13.5px}
   .big-price{font-size:46px}
+}
+@media(max-width:430px){
+  .topbar .inner{gap:8px;padding:8px 11px}
+  .brand h1{font-size:15px;letter-spacing:0}
+  .brand .mark{width:30px;height:30px}
+  .status{font-size:10.5px;padding:3px 8px;gap:5px}
+  .pick select{font-size:12.5px}
+  .icon-btn{width:30px;height:30px}
+  .icon-btn svg{width:15px;height:15px}
 }
 @media(max-width:400px){
   .form-grid,.row3{grid-template-columns:1fr}
@@ -623,11 +637,24 @@ function daysTo(s) { return Math.round((new Date(s + "T00:00:00") - new Date(tod
 const fmt = (n) => (n == null || isNaN(n)) ? "—" : Number(n).toFixed(2);
 const esc = (s) => String(s ?? "").replace(/[&<>"'`]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;", "`": "&#96;" }[c]));
 function numOrNull(v) { const n = parseFloat(v); return Number.isFinite(n) && n >= 0 ? n : null; }
-function setStatus(kind, text) {
+const statusInfo = { kind: "", full: "", short: "" };
+function applyStatusText() {
+  const narrow = window.innerWidth < 560;
+  $("statusText").textContent = narrow ? statusInfo.short : statusInfo.full;
+}
+function setStatus(kind, full, short) {
   const s = $("status");
   s.className = "status " + kind;
-  $("statusText").textContent = text;
+  statusInfo.kind = kind;
+  statusInfo.full = full;
+  statusInfo.short = short || full;
+  applyStatusText();
 }
+let statusRaf = 0;
+window.addEventListener("resize", () => {
+  if (statusRaf) return;
+  statusRaf = requestAnimationFrame(() => { statusRaf = 0; applyStatusText(); });
+});
 
 /* ---------- 省份 ---------- */
 const provSel = $("province");
@@ -651,7 +678,7 @@ function parsePrices(d) {
 
 async function loadPrice() {
   const prov = provSel.value;
-  setStatus("loading", "连接中…");
+  setStatus("loading", "连接中…", "连接中");
   const ctl = new AbortController();
   const timer = setTimeout(() => ctl.abort(), 9000);
   try {
@@ -666,7 +693,7 @@ async function loadPrice() {
     state.updateTime = nowStr();
     state.fetched = true;
     state.updateNote = `数据时间 ${ut ? ut.slice(0, 16) : nowStr()} · 已实时获取`;
-    setStatus("online", "在线 · 已更新");
+    setStatus("online", "在线 · 已更新", "在线");
   } catch (e) {
     const fb = FALLBACK[prov];
     state.price = { 92: fb?.[0] ?? null, 95: fb?.[1] ?? null, 0: fb?.[2] ?? null };
@@ -674,8 +701,10 @@ async function loadPrice() {
     state.updateTime = "2026-11-12 24时（内置基准）";
     state.fetched = false;
     state.updateNote = "内置基准价（2026-11-12 24 时执行）· 接口不可用";
-    setStatus(Object.values(state.price).some((v) => v != null) ? "local" : "off",
-      Object.values(state.price).some((v) => v != null) ? "本地基准 · 接口不可用" : "暂无数据");
+    const hasLocal = Object.values(state.price).some((v) => v != null);
+    setStatus(hasLocal ? "local" : "off",
+      hasLocal ? "本地基准 · 接口不可用" : "暂无数据",
+      hasLocal ? "本地" : "离线");
   } finally {
     clearTimeout(timer);
   }
