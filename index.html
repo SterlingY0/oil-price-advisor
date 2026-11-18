@@ -195,6 +195,24 @@ body{
 .win{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .win-date{font-size:19px;font-weight:750;letter-spacing:-.2px}
 .win-week{font-size:12px;color:var(--sub);font-weight:500}
+.win-dir{
+  font-size:12px;font-weight:650;padding:4px 11px;border-radius:999px;white-space:nowrap;
+  background:var(--down-bg);color:var(--down);border:1px solid var(--down-line)
+}
+.win-dir.up{background:var(--up-bg);color:var(--up);border-color:var(--up-line)}
+.win-dir.flat{background:var(--flat-bg);color:var(--ink-2);border-color:var(--line)}
+.pred{margin-top:16px}
+.pred-head{font-size:12px;color:var(--sub);font-weight:600;margin-bottom:9px;display:flex;align-items:center;gap:6px}
+.pred-head .unit{font-size:11px;color:var(--sub-2);font-weight:400}
+.pred-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pcard{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--radius-xs);padding:11px 12px;min-width:0}
+.pcard .pk{font-size:11.5px;color:var(--sub);font-weight:600}
+.pcard .pv{font-size:15px;font-weight:700;margin-top:5px;white-space:nowrap;letter-spacing:-.2px}
+.pcard .pv i{font-style:normal;color:var(--sub-2);margin:0 3px;font-weight:500}
+.pcard .pd{font-size:11px;margin-top:3px;font-weight:600}
+.pcard .pd.down{color:var(--down)}
+.pcard .pd.up{color:var(--up)}
+.pcard .pd.flat{color:var(--sub)}
 .win-count{
   margin-left:auto;font-size:12px;font-weight:650;padding:4px 11px;border-radius:999px;
   background:var(--flat-bg);color:var(--ink-2);border:1px solid var(--line)
@@ -325,6 +343,10 @@ button:focus-visible{outline:none;box-shadow:var(--ring)}
   .form-grid{grid-template-columns:1fr 1fr}
   .row3{grid-template-columns:1fr 1fr}
   .win-count{margin-left:0}
+  .win-dir{margin-left:0}
+  .pred-grid{gap:8px}
+  .pcard{padding:9px 10px}
+  .pcard .pv{font-size:13.5px}
   .big-price{font-size:46px}
 }
 @media(max-width:400px){
@@ -400,13 +422,19 @@ button:focus-visible{outline:none;box-shadow:var(--ring)}
             <div class="win-date num" id="winDate">—</div>
             <div class="win-week" id="winWeek"></div>
           </div>
+          <span class="win-dir" id="winDir">—</span>
           <span class="win-count" id="winCount">—</span>
         </div>
 
         <div class="prog" aria-hidden="true"><i id="progFill" style="width:0%"></i></div>
         <div class="prog-cap"><span>距窗口生效</span><span id="progText">—</span></div>
 
-        <div class="note">窗口按公开的「10 个工作日一调」日历推算，窗口日 24 时生效；每次调多少以发改委公告为准，本页不预测涨跌。</div>
+        <div class="pred">
+          <div class="pred-head">下次窗口折算价 <span class="unit">每升</span></div>
+          <div class="pred-grid" id="predPrices"></div>
+        </div>
+
+        <div class="note">窗口按公开的「10 个工作日一调」日历推算，窗口日 24 时生效；折算价按上一轮方向、幅度 300 元/吨（汽油 1350 升/吨、柴油 1190 升/吨）估的参考值，正式涨跌以发改委公告为准。</div>
       </section>
     </div>
 
@@ -577,6 +605,9 @@ const state = { price: null, change: null, updateTime: "", fetched: false };
 const FUEL_LABEL = { "92": "92号汽油", "95": "95号汽油", "0": "0号柴油" };
 const FUEL_SHORT = { "92": "92#", "95": "95#", "0": "0#柴油" };
 const FUEL_ORDER = ["92", "95", "0"];
+const ASSUME_TON = { down: -300, up: 300, flat: 0 };
+const DIR_LABEL = { down: "预计下调", up: "预计上调", flat: "搁浅" };
+const DIR_VERB = { down: "降", up: "涨", flat: "平" };
 
 /* ---------- 工具 ---------- */
 const pad = (n) => String(n).padStart(2, "0");
@@ -655,6 +686,11 @@ function chgText(c) {
 }
 
 function currentFuel() { return $("fuelType").value; }
+function currentDir() {
+  const c = state.change && state.change[currentFuel()];
+  if (c == null) return "down";
+  return c < 0 ? "down" : c > 0 ? "up" : "flat";
+}
 
 function renderPrice() {
   const ft = currentFuel();
@@ -710,6 +746,7 @@ function renderTimeline() {
     $("winCount").textContent = "—";
     $("progFill").style.width = "0%";
     $("progText").textContent = "—";
+    renderPred();
     return;
   }
   const d = daysTo(w);
@@ -719,6 +756,28 @@ function renderTimeline() {
   $("winDate").textContent = w.replace(/-/g, "/");
   $("winWeek").textContent = WEEK[new Date(w + "T00:00:00").getDay()] + " 24 时生效";
   $("winCount").textContent = d > 0 ? `还有 ${d} 天` : "今日窗口";
+  renderPred();
+}
+
+function renderPred() {
+  const dir = currentDir();
+  const chip = $("winDir");
+  chip.textContent = DIR_LABEL[dir];
+  chip.className = "win-dir" + (dir === "down" ? "" : " " + dir);
+
+  const box = $("predPrices");
+  box.innerHTML = FUEL_ORDER.map((k) => {
+    const cur = state.price ? state.price[k] : null;
+    const note = L_PER_TON[k] ? Math.abs(ASSUME_TON[dir]) / L_PER_TON[k] : 0;
+    if (cur == null) {
+      return `<div class="pcard"><div class="pk">${FUEL_LABEL[k]}</div>
+        <div class="pv">—</div><div class="pd flat">暂无价格</div></div>`;
+    }
+    const pred = cur + (dir === "down" ? -note : dir === "up" ? note : 0);
+    return `<div class="pcard"><div class="pk">${FUEL_LABEL[k]}</div>
+      <div class="pv num">${cur.toFixed(2)}<i>→</i>${pred.toFixed(2)}</div>
+      <div class="pd num ${dir}">每升${DIR_VERB[dir]} ${note.toFixed(2)}</div></div>`;
+  }).join("");
 }
 
 /* ---------- 品牌车型 ---------- */
