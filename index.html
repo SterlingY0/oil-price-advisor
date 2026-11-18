@@ -176,6 +176,7 @@ body{
 .change.up{background:rgba(255,122,102,.2);border-color:rgba(255,140,120,.4);color:#ffd9d2}
 .change.down{background:rgba(72,224,170,.18);border-color:rgba(88,232,180,.34);color:#c7fff0}
 .hero-updated{position:relative;font-size:11.5px;color:var(--hero-sub);margin-top:6px;letter-spacing:.2px}
+.flavors-hint{margin-top:8px;font-size:11px;color:var(--hero-sub);opacity:.8}
 .flavors{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:17px}
 .flavor{
   border-radius:12px;padding:10px 12px;background:rgba(255,255,255,.07);
@@ -183,6 +184,8 @@ body{
   color:inherit;font:inherit
 }
 .flavor:hover{background:rgba(255,255,255,.12)}
+.flavor{cursor:pointer}
+.flavor:focus-visible{outline:2px solid rgba(255,255,255,.6);outline-offset:2px}
 .flavor.on{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.42);box-shadow:inset 0 1px 0 rgba(255,255,255,.2)}
 .flavor .k{font-size:11px;color:var(--hero-sub);letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .flavor.on .k{color:#b9f2e6}
@@ -235,6 +238,10 @@ body{
 .advice .range{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--brand);
   background:var(--surface);border:1px solid var(--advice-line);border-radius:999px;padding:3px 11px;margin-bottom:8px}
 .advice p{font-size:12.5px;color:var(--ink-2);line-height:1.7}
+.advice.down{background:var(--down-bg);border-color:var(--down-line)}
+.advice.down .head,.advice.down .range{color:var(--down)}
+.advice.up{background:var(--up-bg);border-color:var(--up-line)}
+.advice.up .head,.advice.up .range{color:var(--up)}
 .empty{margin-top:14px;font-size:12.5px;color:var(--sub);padding:14px;border:1px dashed var(--line-2);border-radius:var(--radius-sm);text-align:center}
 .tips{margin-top:14px;display:flex;flex-direction:column;gap:9px}
 .tip{display:flex;gap:9px;align-items:flex-start;border:1px solid var(--line);border-radius:var(--radius-xs);padding:10px 12px;background:var(--surface-2)}
@@ -375,11 +382,6 @@ button:focus-visible{outline:none;box-shadow:var(--ring)}
         <svg class="chev" width="10" height="10" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </label>
 
-      <div class="seg" role="group" aria-label="油品">
-        <button type="button" data-fuel="92" aria-pressed="true">92#</button>
-        <button type="button" data-fuel="95" aria-pressed="false">95#</button>
-        <button type="button" data-fuel="0" aria-pressed="false">0#柴油</button>
-      </div>
       <select id="fuelType" hidden aria-hidden="true" tabindex="-1">
         <option value="92">92号汽油</option>
         <option value="95">95号汽油</option>
@@ -412,6 +414,7 @@ button:focus-visible{outline:none;box-shadow:var(--ring)}
         </div>
         <div class="hero-updated" id="updateMeta">数据加载中…</div>
         <div class="flavors" id="flavors"></div>
+        <div class="flavors-hint">点上面的价格牌可以切换 92# / 95# / 0# 柴油</div>
         <div class="hero-note">价格为各省发改委公布的最高零售限价；加油站实际挂牌价常有优惠，以现场为准。</div>
       </section>
 
@@ -711,9 +714,6 @@ function renderPrice() {
       <div class="k">${FUEL_SHORT[k]}</div><div class="v num">${fmt(v)}</div><div class="c">${ct}</div></button>`;
   }).join("");
 
-  document.querySelectorAll(".seg button[data-fuel]").forEach((b) => {
-    b.setAttribute("aria-pressed", String(b.dataset.fuel === ft));
-  });
 }
 
 function switchFuel(ft) {
@@ -728,9 +728,6 @@ function switchFuel(ft) {
 $("flavors").addEventListener("click", (e) => {
   const b = e.target.closest("[data-fuel]");
   if (b) switchFuel(b.dataset.fuel);
-});
-document.querySelectorAll(".seg button[data-fuel]").forEach((b) => {
-  b.addEventListener("click", () => switchFuel(b.dataset.fuel));
 });
 provSel.addEventListener("change", () => { loadPrice(); });
 
@@ -1027,31 +1024,63 @@ function calc() {
     return;
   }
 
+  const dir = currentDir();
   const remainL = remainKm > 0 ? remainKm / 100 * fuel : 0;
-  let litres = null;
-  let basis = "";
-  if (dist > 0) {
-    litres = Math.max(0, dist / 100 * fuel - remainL);
-    basis = `窗口前还要跑 ${dist} 公里，车里剩油约 ${remainL.toFixed(1)} 升；补 ${litres.toFixed(1)} 升正好撑到调价日。`;
-  } else if (tank > 0) {
-    litres = Math.max(0, tank - remainL);
-    basis = `没填「窗口前还要跑」，按补满 ${tank} 升油箱估算：现在约 ${remainL.toFixed(1)} 升，本次补 ${litres.toFixed(1)} 升。`;
-  } else {
+  const needL = dist > 0 ? Math.max(0, dist / 100 * fuel - remainL) : null;
+  const fillL = tank > 0 ? Math.max(0, tank - remainL) : null;
+  const noBasis = () => {
     adviceShown = false;
     $("adviceTag").textContent = "按本机记录估算";
     box.innerHTML = `<div class="empty">填「窗口前还要跑」公里数，或选品牌车型带出油箱容量，就能算出这次该加多少钱。</div>`;
-    return;
+  };
+
+  let low = null, high = null, head = "", basis = "", tag = "";
+  if (dir === "up") {
+    head = "下个窗口预计上调：窗口前把油加满，锁定当前价格";
+    low = needL != null ? needL : fillL;
+    high = fillL != null ? fillL : needL;
+    if (low == null) return noBasis();
+    basis = fillL != null
+      ? `油箱 ${tank} 升、车里约 ${remainL.toFixed(1)} 升，加满要补 ${fillL.toFixed(1)} 升`
+        + (needL != null ? `；只撑到调价日最少补 ${needL.toFixed(1)} 升。` : "。")
+      : `没选车型带出油箱，按窗口前 ${dist} 公里最少补 ${needL.toFixed(1)} 升估。`;
+    tag = "按上一轮上调推算";
+  } else if (dir === "down") {
+    head = "下个窗口预计下调：窗口前少加，降价后再加满更划算";
+    low = needL != null ? needL : fillL;
+    high = low;
+    if (low == null) return noBasis();
+    basis = needL != null
+      ? `窗口前还要跑 ${dist} 公里、车里约 ${remainL.toFixed(1)} 升，补 ${needL.toFixed(1)} 升正好撑到调价日；24 时降价后再加满，可省一轮差价。`
+      : `没填「窗口前还要跑」，按补满 ${tank} 升油箱的上限估算；窗口前建议只加够通勤所需，等降价再加满。`;
+    tag = "按上一轮下调推算";
+  } else {
+    head = "下个窗口预计搁浅：按日常所需加油即可";
+    low = needL != null ? needL : fillL;
+    high = low;
+    if (low == null) return noBasis();
+    basis = needL != null
+      ? `价格预计持平，按窗口前 ${dist} 公里所需油量加注即可；车里约 ${remainL.toFixed(1)} 升。`
+      : `价格预计持平，按补满 ${tank} 升油箱估算即可，不必刻意囤油。`;
+    tag = "按上一轮搁浅推算";
   }
 
-  const money = litres * cur;
-  const kmAdded = litres / fuel * 100;
-  const kmAfter = kmAdded + (remainKm > 0 ? remainKm : 0);
-  box.innerHTML = `<div class="advice">
-    <div class="head">按当前 ${cur.toFixed(2)} 元/升、油耗 ${fuel.toFixed(1)} L/100km 估算</div>
-    <div class="money num">本次建议加 约 ${money.toFixed(0)} 元 <span>（约 ${litres.toFixed(1)} 升）</span></div>
+  const moneyLow = low * cur;
+  const moneyHigh = high * cur;
+  const moneyText = Math.abs(moneyHigh - moneyLow) < 0.5
+    ? `约 ${moneyLow.toFixed(0)} 元`
+    : `${moneyLow.toFixed(0)} ~ ${moneyHigh.toFixed(0)} 元`;
+  const litreText = Math.abs(high - low) < 0.05
+    ? `${low.toFixed(1)} 升`
+    : `${low.toFixed(1)} ~ ${high.toFixed(1)} 升`;
+  const kmAfter = high / fuel * 100 + (remainKm > 0 ? remainKm : 0);
+
+  box.innerHTML = `<div class="advice ${dir === "up" ? "up" : dir === "down" ? "down" : ""}">
+    <div class="head">${head}</div>
+    <div class="money num">本次建议加 ${moneyText} <span>（${litreText}）</span></div>
     <div class="range num">加完约能跑 ${kmAfter.toFixed(0)} 公里</div>
     <p>${basis}</p></div>`;
-  $("adviceTag").textContent = "按本机记录估算";
+  $("adviceTag").textContent = tag;
   adviceShown = true;
 }
 
