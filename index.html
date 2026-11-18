@@ -22,6 +22,7 @@
   --down:#0f8a5f; --down-bg:#e6f6ee; --down-line:#bfe8d4;
   --up:#cf4634; --up-bg:#fdecea; --up-line:#f7cdc7;
   --flat-bg:#eef2f6;
+  --advice-bg:#eaf7f4; --advice-line:#c7e7e1;
   --radius:18px; --radius-sm:12px; --radius-xs:10px;
   --shadow-1:0 1px 2px rgba(16,24,40,.05);
   --shadow-2:0 18px 40px -24px rgba(16,24,40,.35);
@@ -39,6 +40,7 @@
   --down:#38c48c; --down-bg:#10281f; --down-line:#1d4b3a;
   --up:#f0735f; --up-bg:#2a1714; --up-line:#4d2a24;
   --flat-bg:#18222b;
+  --advice-bg:#0d2523; --advice-line:#1d4340;
   --shadow-1:0 1px 2px rgba(0,0,0,.4);
   --shadow-2:0 18px 40px -24px rgba(0,0,0,.85);
   --ring:0 0 0 3px rgba(47,179,171,.22);
@@ -121,6 +123,10 @@ body{
 }
 .icon-btn:hover{color:var(--brand);border-color:color-mix(in srgb,var(--brand) 45%,var(--line-2))}
 .icon-btn svg{width:17px;height:17px}
+[data-theme="dark"] button.mini,
+[data-theme="dark"] button.ghost{background:var(--surface-3);color:var(--ink-2)}
+[data-theme="dark"] button.mini:hover,
+[data-theme="dark"] button.ghost:hover{background:var(--surface);border-color:var(--brand);color:var(--brand)}
 [data-theme="dark"] .icon-btn .moon{display:none}
 :root:not([data-theme="dark"]) .icon-btn .sun{display:none}
 
@@ -193,20 +199,6 @@ body{
   margin-left:auto;font-size:12px;font-weight:650;padding:4px 11px;border-radius:999px;
   background:var(--flat-bg);color:var(--ink-2);border:1px solid var(--line)
 }
-.tl-dir{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:650;padding:4px 11px;border-radius:999px}
-.tl-dir.down{background:var(--down-bg);color:var(--down);border:1px solid var(--down-line)}
-.tl-dir.up{background:var(--up-bg);color:var(--up);border:1px solid var(--up-line)}
-.tl-dir.flat{background:var(--flat-bg);color:var(--sub);border:1px solid var(--line)}
-.pred-prices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:15px}
-.pp{border:1px solid var(--line);border-radius:var(--radius-sm);padding:11px 12px;background:var(--surface-2);min-width:0}
-.pp .k{font-size:11.5px;color:var(--sub)}
-.pp .row{display:flex;align-items:baseline;gap:6px;margin-top:5px;white-space:nowrap;min-width:0}
-.pp .old{font-size:12px;color:var(--sub-2);text-decoration:line-through}
-.pp .arrow{font-size:11px;color:var(--sub-2)}
-.pp .next{font-size:17px;font-weight:750;letter-spacing:-.4px}
-.pp .u{font-size:11px;color:var(--sub)}
-.pp .next.down{color:var(--down)} .pp .next.up{color:var(--up)} .pp .next.flat{color:var(--ink)}
-.pp .psub{font-size:11.5px;color:var(--sub);margin-top:3px}
 .note{margin-top:13px;font-size:11.5px;color:var(--sub);line-height:1.65}
 .prog{position:relative;height:6px;border-radius:999px;background:var(--surface-3);overflow:hidden;margin-top:15px;border:1px solid var(--line)}
 .prog i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--brand-2),var(--brand));transition:width .5s cubic-bezier(.2,.7,.3,1)}
@@ -218,14 +210,12 @@ body{
 .metric .k{font-size:11.5px;color:var(--sub);white-space:nowrap}
 .metric .v{font-size:16px;font-weight:700;margin-top:3px;letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .metric .v.dim{color:var(--sub-2);font-weight:600}
-.advice{margin-top:14px;border-radius:var(--radius-sm);padding:16px;border:1px solid transparent}
-.advice.down{background:var(--down-bg);border-color:var(--down-line)}
-.advice.up{background:var(--up-bg);border-color:var(--up-line)}
-.advice.flat{background:var(--flat-bg);border-color:var(--line)}
-.advice .head{font-size:13px;font-weight:700;line-height:1.5}
-.advice.down .head{color:var(--down)} .advice.up .head{color:var(--up)} .advice.flat .head{color:var(--ink-2)}
+.advice{margin-top:14px;border-radius:var(--radius-sm);padding:16px;background:var(--advice-bg);border:1px solid var(--advice-line)}
+.advice .head{font-size:12.5px;font-weight:650;line-height:1.5;color:var(--brand)}
 .advice .money{font-size:23px;font-weight:800;letter-spacing:-.6px;margin:7px 0 2px;color:var(--ink)}
 .advice .money span{font-size:13px;font-weight:600;color:var(--ink-2);letter-spacing:0}
+.advice .range{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--brand);
+  background:var(--surface);border:1px solid var(--advice-line);border-radius:999px;padding:3px 11px;margin-bottom:8px}
 .advice p{font-size:12.5px;color:var(--ink-2);line-height:1.7}
 .empty{margin-top:14px;font-size:12.5px;color:var(--sub);padding:14px;border:1px dashed var(--line-2);border-radius:var(--radius-sm);text-align:center}
 .tips{margin-top:14px;display:flex;flex-direction:column;gap:9px}
@@ -261,6 +251,22 @@ input[type=date]::-webkit-date-and-time-value{text-align:left}
 .field.tank-required .req{display:inline}
 .field.tank-required input{border-color:var(--up);box-shadow:0 0 0 3px color-mix(in srgb,var(--up) 12%,transparent)}
 .field.tank-required >label:after{content:"需填写";font-size:10px;color:var(--up);font-weight:600;white-space:nowrap}
+.combo{position:relative}
+.combo input{padding-right:34px}
+.combo-btn{position:absolute;right:5px;top:50%;transform:translateY(-50%);width:26px;height:26px;border:0;
+  background:transparent;color:var(--sub);font-size:12px;line-height:1;cursor:pointer;border-radius:7px;
+  display:flex;align-items:center;justify-content:center}
+.combo-btn::before{content:"";width:7px;height:7px;border-right:1.7px solid currentColor;border-bottom:1.7px solid currentColor;
+  border-radius:1px;transform:rotate(45deg) translate(-1px,-2px)}
+.combo-btn:hover,.combo-btn[aria-expanded="true"]{background:var(--surface-3);color:var(--ink)}
+.combo-btn[aria-expanded="true"]::before{transform:rotate(-135deg) translate(-1px,-1px)}
+.combo-pop{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:60;max-height:228px;overflow:auto;
+  background:var(--surface);border:1px solid var(--line-2);border-radius:var(--radius-sm);
+  box-shadow:var(--shadow-2);padding:4px;-webkit-overflow-scrolling:touch}
+.combo-item{display:block;width:100%;text-align:left;padding:8px 10px;border:0;background:transparent;
+  color:var(--ink);font-size:13.5px;border-radius:8px;cursor:pointer;font-family:inherit}
+.combo-item:hover,.combo-item:focus-visible{background:var(--surface-3)}
+.combo-empty{padding:10px 10px;color:var(--sub);font-size:12.5px}
 
 /* 方案行 */
 .plan-list{display:flex;flex-direction:column;gap:7px}
@@ -316,9 +322,6 @@ button:focus-visible{outline:none;box-shadow:var(--ring)}
   .flavors{gap:6px}
   .flavor{padding:8px 9px}
   .flavor .v{font-size:16px}
-  .pred-prices{gap:6px}
-  .pp{padding:9px 9px}
-  .pp .next{font-size:15px}
   .form-grid{grid-template-columns:1fr 1fr}
   .row3{grid-template-columns:1fr 1fr}
   .win-count{margin-left:0}
@@ -397,21 +400,13 @@ button:focus-visible{outline:none;box-shadow:var(--ring)}
             <div class="win-date num" id="winDate">—</div>
             <div class="win-week" id="winWeek"></div>
           </div>
-          <span class="tl-dir down" id="winDir">预计下调</span>
           <span class="win-count" id="winCount">—</span>
         </div>
 
         <div class="prog" aria-hidden="true"><i id="progFill" style="width:0%"></i></div>
         <div class="prog-cap"><span>距窗口生效</span><span id="progText">—</span></div>
 
-        <div class="seg" role="group" aria-label="假设调价方向" style="margin-top:14px">
-          <button type="button" data-dir="down" aria-pressed="true">假设下调</button>
-          <button type="button" data-dir="up" aria-pressed="false">假设上调</button>
-          <button type="button" data-dir="flat" aria-pressed="false">假设搁浅</button>
-        </div>
-
-        <div class="pred-prices" id="timeline"></div>
-        <div class="note">方向为可切换的参考假设；幅度按 ±300 元/吨、汽油约 1350 升/吨、柴油约 1190 升/吨折算。正式涨跌以发改委调价公告为准。</div>
+        <div class="note">窗口按公开的「10 个工作日一调」日历推算，窗口日 24 时生效；每次调多少以发改委公告为准，本页不预测涨跌。</div>
       </section>
     </div>
 
@@ -457,13 +452,19 @@ button:focus-visible{outline:none;box-shadow:var(--ring)}
           <div class="row3">
             <div class="field">
               <label for="brand">品牌 <span class="unit">可输入可下拉</span></label>
-              <input type="text" id="brand" list="brandList" placeholder="输入或选择" autocomplete="off">
-              <datalist id="brandList"></datalist>
+              <div class="combo">
+                <input type="text" id="brand" placeholder="输入或选择" autocomplete="off">
+                <button type="button" class="combo-btn" id="brandBtn" aria-label="展开品牌列表" aria-expanded="false"></button>
+                <div class="combo-pop" id="brandPop" role="listbox" aria-label="品牌列表" hidden></div>
+              </div>
             </div>
             <div class="field">
               <label for="model">车型 <span class="unit">可输入可下拉</span></label>
-              <input type="text" id="model" list="modelList" placeholder="输入或选择" autocomplete="off">
-              <datalist id="modelList"></datalist>
+              <div class="combo">
+                <input type="text" id="model" placeholder="输入或选择" autocomplete="off">
+                <button type="button" class="combo-btn" id="modelBtn" aria-label="展开车型列表" aria-expanded="false"></button>
+                <div class="combo-pop" id="modelPop" role="listbox" aria-label="车型列表" hidden></div>
+              </div>
             </div>
             <div class="field">
               <label for="tank">油箱容量 <span class="unit">升</span><span class="req">*</span></label>
@@ -699,13 +700,9 @@ provSel.addEventListener("change", () => { loadPrice(); });
 
 /* ---------- 调价窗口 ---------- */
 const upcoming = WINDOWS.filter((w) => w > todayStr()).slice(0, 1);
-const predState = upcoming.map(() => ({ dir: "down" }));
-const ASSUME_TON = { down: -300, up: 300, flat: 0 };
-const DIR_LABEL = { down: "预计下调", up: "预计上调", flat: "预计搁浅" };
 const WEEK = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
 
 function renderTimeline() {
-  const box = $("timeline");
   const w = upcoming[0];
   if (!w) {
     $("winDate").textContent = "暂无窗口";
@@ -713,10 +710,8 @@ function renderTimeline() {
     $("winCount").textContent = "—";
     $("progFill").style.width = "0%";
     $("progText").textContent = "—";
-    box.innerHTML = `<div class="empty" style="grid-column:1/-1">本年度调价窗口已用尽。</div>`;
     return;
   }
-  const st = predState[0];
   const d = daysTo(w);
   const pct = Math.max(4, Math.min(100, Math.round(((10 - Math.min(Math.max(d, 0), 10)) / 10) * 100)));
   $("progFill").style.width = pct + "%";
@@ -724,51 +719,67 @@ function renderTimeline() {
   $("winDate").textContent = w.replace(/-/g, "/");
   $("winWeek").textContent = WEEK[new Date(w + "T00:00:00").getDay()] + " 24 时生效";
   $("winCount").textContent = d > 0 ? `还有 ${d} 天` : "今日窗口";
-  const dirEl = $("winDir");
-  dirEl.textContent = DIR_LABEL[st.dir];
-  dirEl.className = "tl-dir " + st.dir;
-  document.querySelectorAll(".seg button[data-dir]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.dir === st.dir)));
-
-  box.innerHTML = FUEL_ORDER.map((k) => {
-    const base = state.price?.[k];
-    const perL = st.dir === "flat" ? 0 : ASSUME_TON[st.dir] / L_PER_TON[k];
-    const next = base == null ? null : +(base + perL).toFixed(2);
-    const cls = st.dir === "flat" ? "flat" : st.dir;
-    const delta = perL === 0 ? "价格持平" : perL < 0 ? `每升降 ${Math.abs(perL).toFixed(2)}` : `每升涨 ${perL.toFixed(2)}`;
-    return `<div class="pp">
-      <div class="k">${FUEL_LABEL[k]}</div>
-      <div class="row"><span class="old num">${fmt(base)}</span><span class="arrow">→</span><span class="next ${cls} num">${next == null ? "—" : next.toFixed(2)}</span><span class="u">元/升</span></div>
-      <div class="psub">${delta}</div></div>`;
-  }).join("");
 }
-document.querySelectorAll(".seg button[data-dir]").forEach((b) => {
-  b.addEventListener("click", () => {
-    if (!predState.length) return;
-    predState[0].dir = b.dataset.dir;
-    renderTimeline();
-    updateMetrics();
-    if (adviceShown) calc();
-  });
-});
 
 /* ---------- 品牌车型 ---------- */
 const brandIn = $("brand"), modelIn = $("model");
-const brandList = $("brandList"), modelList = $("modelList");
 const nameSorter = (a, b) => String(a).localeCompare(String(b), "zh-CN", { sensitivity: "base" });
-Object.keys(CAR_TANKS).sort(nameSorter).forEach((b) => {
-  const o = document.createElement("option"); o.value = b; brandList.appendChild(o);
-});
 function tankFor(brand, model) {
   const hit = (CAR_TANKS[brand] || []).find(([m]) => m === model);
   return hit ? hit[1] : null;
 }
-function fillModels() {
-  const arr = CAR_TANKS[brandIn.value.trim()] || [];
-  modelList.innerHTML = "";
-  arr.map((x) => x[0]).sort(nameSorter).forEach((m) => {
-    const o = document.createElement("option"); o.value = m; modelList.appendChild(o);
+
+/* 自定义下拉：iOS 上原生 datalist 不弹窗，这里自己做 */
+function makeCombo(input, btn, pop, getItems) {
+  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+  function renderPop() {
+    const q = input.value.trim().toLowerCase();
+    const items = getItems().filter((x) => !q || String(x).toLowerCase().indexOf(q) >= 0);
+    pop.innerHTML = items.length
+      ? items.map((x) => `<button type="button" class="combo-item" role="option" data-v="${esc(x)}">${esc(x)}</button>`).join("")
+      : `<div class="combo-empty">没有匹配项，可直接输入</div>`;
+  }
+  function open() {
+    renderPop();
+    pop.hidden = false;
+    btn.setAttribute("aria-expanded", "true");
+  }
+  function close() {
+    pop.hidden = true;
+    btn.setAttribute("aria-expanded", "false");
+  }
+  btn.addEventListener("click", (e) => {
+    e.preventDefault();
+    if (pop.hidden) open(); else close();
   });
+  input.addEventListener("focus", () => { if (pop.hidden) open(); });
+  input.addEventListener("input", () => { if (!pop.hidden) renderPop(); });
+  input.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+  pop.addEventListener("mousedown", (e) => {
+    const b = e.target.closest(".combo-item");
+    if (!b) return;
+    e.preventDefault();
+    input.value = b.dataset.v;
+    close();
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  document.addEventListener("click", (e) => {
+    if (pop.hidden) return;
+    if (pop.contains(e.target) || e.target === input || e.target === btn) return;
+    close();
+  });
+  return { open, close, renderPop };
+}
+
+const brandCombo = makeCombo($("brand"), $("brandBtn"), $("brandPop"),
+  () => Object.keys(CAR_TANKS).sort(nameSorter));
+const modelCombo = makeCombo($("model"), $("modelBtn"), $("modelPop"),
+  () => (CAR_TANKS[brandIn.value.trim()] || []).map((x) => x[0]).sort(nameSorter));
+
+function fillModels() {
   applyTank();
+  if (!$("modelPop").hidden) modelCombo.renderPop();
 }
 function applyTank() {
   const brand = brandIn.value.trim(), model = modelIn.value.trim();
@@ -946,49 +957,42 @@ function calc() {
   const box = $("adviceBox");
   if (cur == null) {
     adviceShown = false;
+    $("adviceTag").textContent = "按本机记录估算";
     box.innerHTML = `<div class="empty">当前油价缺失，请切换省份或联网后重试。</div>`;
     return;
   }
-
-  const dir = predState[0]?.dir || "flat";
-  const remainL = (remainKm > 0 && fuel != null) ? remainKm / 100 * fuel : 0;
-  const needL = (dist > 0 && fuel != null) ? Math.max(0, dist / 100 * fuel - remainL) : null;
-
-  let head, advice, low, high, litreLow, litreHigh, cls;
-  if (dir === "down") {
-    cls = "down";
-    head = "下个窗口预计下调：现在少加，撑到降价后再加满更划算";
-    litreLow = litreHigh = needL;
-    low = high = needL != null ? needL * cur : null;
-    advice = needL != null
-      ? `按窗口前还要跑 ${dist} 公里、油耗 ${fuel.toFixed(1)} L/100km 估算，本次加够这段路程即可；待 24 时降价后再去加满，可省下一轮差价。`
-      : `窗口前里程或油耗未填，建议只加够当前通勤所需，待降价后再加满。`;
-  } else if (dir === "up") {
-    cls = "up";
-    head = "下个窗口预计上调：建议窗口前把油加满，锁定当前低价";
-    const fillL = (tank > 0) ? Math.max(0, tank - remainL) : null;
-    litreLow = needL; litreHigh = fillL;
-    low = needL != null ? needL * cur : null;
-    high = fillL != null ? fillL * cur : low;
-    advice = tank > 0
-      ? `油箱 ${tank} 升，按当前 ${cur.toFixed(2)} 元/升加满约 ${(tank * cur).toFixed(0)} 元；扣除剩余油量后本次约加 ${fillL.toFixed(1)} 升。若不加满，至少要覆盖窗口前的里程。`
-      : `未选车型或油箱容量，按当前 ${cur.toFixed(2)} 元/升，建议涨价前补足油箱；至少要覆盖窗口前的里程。`;
-  } else {
-    cls = "flat";
-    head = "下个窗口预计搁浅：按日常所需加油即可";
-    litreLow = litreHigh = needL;
-    low = high = needL != null ? needL * cur : null;
-    advice = `价格预计持平，无需刻意囤油；按窗口前预计 ${dist || "—"} 公里的所需油量加注即可。`;
+  if (fuel == null) {
+    adviceShown = false;
+    $("adviceTag").textContent = "按本机记录估算";
+    box.innerHTML = `<div class="empty">还差「百公里油耗」：填油耗，或填「加油量 + 上次行驶里程」，会自动算出来。</div>`;
+    return;
   }
 
-  const moneyText = (low == null) ? "—" : (Math.abs(high - low) < 0.01 ? `约 ${low.toFixed(0)} 元` : `${low.toFixed(0)} ~ ${high.toFixed(0)} 元`);
-  const litreText = (litreLow == null) ? "—" : (Math.abs(litreHigh - litreLow) < 0.01 ? `约 ${litreLow.toFixed(1)} 升` : `${litreLow.toFixed(1)} ~ ${litreHigh.toFixed(1)} 升`);
+  const remainL = remainKm > 0 ? remainKm / 100 * fuel : 0;
+  let litres = null;
+  let basis = "";
+  if (dist > 0) {
+    litres = Math.max(0, dist / 100 * fuel - remainL);
+    basis = `窗口前还要跑 ${dist} 公里，车里剩油约 ${remainL.toFixed(1)} 升；补 ${litres.toFixed(1)} 升正好撑到调价日。`;
+  } else if (tank > 0) {
+    litres = Math.max(0, tank - remainL);
+    basis = `没填「窗口前还要跑」，按补满 ${tank} 升油箱估算：现在约 ${remainL.toFixed(1)} 升，本次补 ${litres.toFixed(1)} 升。`;
+  } else {
+    adviceShown = false;
+    $("adviceTag").textContent = "按本机记录估算";
+    box.innerHTML = `<div class="empty">填「窗口前还要跑」公里数，或选品牌车型带出油箱容量，就能算出这次该加多少钱。</div>`;
+    return;
+  }
 
-  box.innerHTML = `<div class="advice ${cls}">
-    <div class="head">${head}</div>
-    <div class="money num">本次建议加 ${moneyText} <span>（${litreText}）</span></div>
-    <p>${advice}</p></div>`;
-  $("adviceTag").textContent = `按 ${DIR_LABEL[dir]} 假设估算`;
+  const money = litres * cur;
+  const kmAdded = litres / fuel * 100;
+  const kmAfter = kmAdded + (remainKm > 0 ? remainKm : 0);
+  box.innerHTML = `<div class="advice">
+    <div class="head">按当前 ${cur.toFixed(2)} 元/升、油耗 ${fuel.toFixed(1)} L/100km 估算</div>
+    <div class="money num">本次建议加 约 ${money.toFixed(0)} 元 <span>（约 ${litres.toFixed(1)} 升）</span></div>
+    <div class="range num">加完约能跑 ${kmAfter.toFixed(0)} 公里</div>
+    <p>${basis}</p></div>`;
+  $("adviceTag").textContent = "按本机记录估算";
   adviceShown = true;
 }
 

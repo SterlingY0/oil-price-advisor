@@ -35,17 +35,24 @@ def api(method, path, body=None):
     if body is not None:
         data = json.dumps(body).encode("utf-8")
         headers["Content-Type"] = "application/json"
-    req = urllib.request.Request(API + path, data=data, headers=headers, method=method)
-    try:
-        with urllib.request.urlopen(req, timeout=45) as r:
-            raw = r.read().decode("utf-8", "replace")
-            return r.status, (json.loads(raw) if raw.strip() else {})
-    except urllib.error.HTTPError as e:
-        raw = e.read().decode("utf-8", "replace")
+    last = None
+    for attempt in range(4):
+        req = urllib.request.Request(API + path, data=data, headers=headers, method=method)
         try:
-            return e.code, json.loads(raw)
-        except ValueError:
-            return e.code, {"raw": raw}
+            with urllib.request.urlopen(req, timeout=45) as r:
+                raw = r.read().decode("utf-8", "replace")
+                return r.status, (json.loads(raw) if raw.strip() else {})
+        except urllib.error.HTTPError as e:
+            raw = e.read().decode("utf-8", "replace")
+            try:
+                return e.code, json.loads(raw)
+            except ValueError:
+                return e.code, {"raw": raw}
+        except (urllib.error.URLError, OSError) as e:
+            last = e
+            print("  [net] %s %s 重试 %d/4: %s" % (method, path, attempt + 1, e))
+            time.sleep(3 + attempt * 3)
+    raise SystemExit("[FAIL] 网络错误，放弃: %s" % last)
 
 
 def main():
